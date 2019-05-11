@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Clean Desk Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Slab:100,300,400,700" rel="stylesheet">
+    <style type="text/css">
+        * {
+            box-sizing: border-box;
+        }
+        html, body {
+            height: 100%;
+        }
+        body {
+            background-color: #111;
+            margin: 0;
+            font-family: 'Roboto Slab', serif;
+        }
+        main {
+            display: flex;
+            flex-flow: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+        main footer {
+            font-weight: 300;
+            color: rgba(255,255,255,.5);
+        }
+
+        button {
+            font-family: 'Roboto Slab', serif;
+            background-color: transparent;
+            border: 1px solid #eee;
+            padding: 15px 30px;
+            text-transform: uppercase;
+            color: #fff;
+            font-size: 24px;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: background-color .2s;
+        }
+        button:hover {
+            background-color: rgba(255,255,255,.1);
+        }
+
+        #canvas {
+            position: relative;
+            border: 5px solid #999;
+            background-color: rgba(255,255,255,.1);
+            color: #eee;
+            margin: 10px;
+            width: 1200px;
+            height: 800px;
+            overflow: hidden;
+        }
+
+        .scene {
+            position: relative;
+            display: none;
+            height: 100%;
+        }
+        .scene p {
+            font-size: 28px;
+            font-weight: 300;
+            line-height: 1.8em;
+        }
+        #scene-start {
+            text-align: center;
+        }
+        #scene-start h1 {
+            font-size: 72px;
+            font-weight: 100;
+            text-shadow: 1px 1px #000;
+            margin-bottom: 0;
+        }
+        #scene-start h3 {
+            font-size: 34px;
+            font-weight: 100;
+            margin-bottom: 180px;
+            margin-top: 0;
+            letter-spacing: 2px;
+        }
+        .scene-text {
+            padding: 0 50px;
+        }
+        .scene-text h2 {
+            font-size: 48px;
+            font-weight: 100;
+            text-shadow: 1px 1px #000;
+        }
+
+        .area {
+            position: absolute;
+            transition: background-color .2s, box-shadow .2s;
+            cursor: crosshair;
+        }
+        .area:hover {
+            background-color: rgba(255,255,255,.2);
+            box-shadow: 0 0 5px orange;
+        }
+        #area-01-ceo {
+            top: 200px;
+            left: 230px;
+            width: 300px;
+            height: 400px;
+        }
+        #area-01-desk {
+            top: 250px;
+            left: 580px;
+            width: 500px;
+            height: 500px;
+        }
+        #area-02-pc {
+            top: 100px;
+            left: 230px;
+            width: 350px;
+            height: 190px;
+        }
+        #area-02-keyboard {
+            top: 340px;
+            left: 290px;
+            width: 350px;
+            height: 190px;
+        }
+        #area-02-sheets {
+            top: 400px;
+            left: 60px;
+            width: 200px;
+            height: 240px;
+        }
+        #area-02-bin {
+            top: 560px;
+            left: 500px;
+            width: 200px;
+            height: 200px;
+        }
+        #area-02-info {
+            top: 260px;
+            left: 750px;
+            width: 150px;
+            height: 160px;
+        }
+        #area-02-cupboard {
+            top: 20px;
+            right: 0;
+            width: 250px;
+            height: 640px;
+        }
+        #area-03-door {
+            top: 300px;
+            left: 330px;
+            width: 350px;
+            height: 480px;
+        }
+        #area-04-office {
+            top: 100px;
+            left: 400px;
+            width: 450px;
+            height: 600px;
+        }
+        #area-11-pc {
+            top: 80px;
+            left: 200px;
+            width: 800px;
+            height: 460px;
+        }
+        #area-12-thumb {
+            top: 140px;
+            left: 260px;
+            width: 120px;
+            height: 200px;
+        }
+        #area-21-keyboard {
+            top: 280px;
+            left: 150px;
+            width: 880px;
+            height: 280px;
+        }
+        #area-31-sheets {
+            top: 140px;
+            left: 560px;
+            width: 240px;
+            height: 460px;
+        }
+        #area-32-sheets {
+            top: 120px;
+            left: 360px;
+            width: 240px;
+            height: 440px;
+        }
+        #area-41-bin {
+            top: 200px;
+            left: 340px;
+            width: 400px;
+            height: 320px;
+        }
+        #area-51-safe {
+            top: 200px;
+            left: 240px;
+            width: 840px;
+            height: 420px;
+        }
+
+        .image-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .go-back {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background-color: rgba(0,0,0,.4);
+            border: none;
+        }
+        .go-back:hover {
+            background-color: rgba(0,0,0,.6);
+        }
+        #notifications {
+            position: absolute;
+            top: 0;
+            text-align: left;
+            background-color: rgba(0,0,0,.5);
+            font-size: 26px;
+            color: #eee;
+            margin: 8px;
+            padding: 10px 20px;
+            transform: translateY(0);
+            transition: transform .2s;
+        }
+        #notifications ul {
+            margin: 0;
+            padding-left: 25px;
+        }
+        #notifications.hidden {
+            transform: translateY(calc(-100% - 8px));
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <div id="canvas">
+
+            <div class="scene" id="scene-start">
+                <h1>Clean Desk</h1>
+                <h3>An Awareness Game</h3>
+                <button onclick="render('intro')">Start</button>
+            </div>
+            <div class="scene scene-text" id="scene-intro">
+                <h2>Your mission</h2>
+                <p>You are at <b>Umbrella Corp</b> at the front desk of secretary <b>Guybrush Ulysses Threepwood</b>.</p>
+                <p>The CEO <b>Claire Redfield</b> possess information valuable to you.</p>
+                <p><strong>Get access to the CEOs office!</strong></p>
+                <p style="text-align: center; margin-top: 80px;">
+                    <button onclick="render('01')"> → </button>
+                </p>
+            </div>
+
+            <div class="scene" id="scene-01">
+                <img class="image-bg" src="assets/board-3-A8IOM-posterframe.jpg" alt="Hallway">
+                <div class="area" id="area-01-ceo" onclick="render('03')"></div>
+                <div class="area" id="area-01-desk" onclick="render('02')"></div>
+            </div>
+            <div class="scene" id="scene-02">
+                <img class="image-bg" src="assets/board-6-B7QOW-posterframe.jpg" alt="Front desk">
+                <div class="area" id="area-02-pc" onclick="render('11')"></div>
+                <div class="area" id="area-02-keyboard" onclick="render('21')"></div>
+                <div class="area" id="area-02-sheets" onclick="render('31')"></div>
+                <div class="area" id="area-02-bin" onclick="render('41')"></div>
+                <div class="area" id="area-02-cupboard" onclick="render('51')"></div>
+                <div class="area" id="area-02-info" onclick="render('61')"></div>
+                <button class="go-back" onclick="render('01')"> ← </button>
+            </div>
+            <div class="scene" id="scene-03">
+                <img class="image-bg" src="assets/board-4-R9MM1-posterframe.jpg" alt="CEO door">
+                <div class="area" id="area-03-door" onclick="render('04')"></div>
+                <button class="go-back" onclick="render('01')"> ← </button>
+            </div>
+            <div class="scene" id="scene-04">
+                <img class="image-bg" src="assets/board-5-6HI32-posterframe.jpg" alt="Offer #2">
+                <div class="area" id="area-04-office" onclick="render('fin')"></div>
+                <button class="go-back" onclick="render('03')"> ← </button>
+            </div>
+            <div class="scene" id="scene-11">
+                <img class="image-bg" src="assets/board-7-870P8-posterframe.jpg" alt="PC">
+                <div class="area" id="area-11-pc" onclick="render('12')"></div>
+                <button class="go-back" onclick="render('02')"> ← </button>
+            </div>
+            <div class="scene" id="scene-12">
+                <img class="image-bg" src="assets/board-8-JRDY1-posterframe.jpg" alt="PC Desktop">
+                <div class="area" id="area-12-thumb" onclick="render('13')"></div>
+                <button class="go-back" onclick="render('02')"> ← </button>
+            </div>
+            <div class="scene" id="scene-13">
+                <img class="image-bg" src="assets/board-8-7QRNZ-posterframe.jpg" alt="PC open file">
+                <button class="go-back" onclick="render('02')"> ← </button>
+            </div>
+            <div class="scene" id="scene-21">
+                <img class="image-bg" src="assets/board-9-KMW3P-posterframe.jpg" alt="Keyboard">
+                <div class="area" id="area-21-keyboard" onclick="render('22')"></div>
+                <button class="go-back" onclick="render('02')"> ← </button>
+            </div>
+            <div class="scene" id="scene-22">
+                <img class="image-bg" src="assets/board-11-1GRW5-posterframe.jpg" alt="Keyboard backside">
+                <button class="go-back" onclick="render('02')"> ← </button>
+            </div>
+            <div class="scene" id="scene-31">
+                <img class="image-bg" src="assets/board-12-SZX2B-posterframe.jpg" alt="Sheets">
+                <div class="area" id="area-31-sheets" onclick="render('32')"></div>
+                <button class="go-back" onclick="render('02')"> ← </button>
+            </div>
+            <div class="scene" id="scene-32">
+                <img class="image-bg" src="assets/board-13-PU7EK-posterframe.jpg" alt="Sheets">
+                <div class="area" id="area-32-sheets" onclick="render('33')"></div>
+                <button class="go-back" onclick="render('02')"> ← </button>
+            </div>
+            <div class="scene" id="scene-33">
+                <img class="image-bg" src="assets/board-14-SC8AS-posterframe.jpg" alt="Sheet with code">
+                <button class="go-back" onclick="render('02')"> ← </button>
+            </div>
+            <div class="scene" id="scene-41">
+                <img class="image-bg" src="assets/board-15-3CMNU-posterframe.jpg" alt="Dust bin">
+                <div class="area" id="area-41-bin" onclick="render('42')"></div>
+                <button class="go-back" onclick="render('02')"> ← </button>
+            </div>
+            <div class="scene" id="scene-42">
+                <img class="image-bg" src="assets/board-16-FTHYH-posterframe.jpg" alt="Sheet">
+                <button class="go-back" onclick="render('02')"> ← </button>
+            </div>
+            <div class="scene" id="scene-51">
+                <img class="image-bg" src="assets/board-17-TZ329-posterframe.jpg" alt="Cupboard">
+                <div class="area" id="area-51-safe" onclick="render('52')"></div>
+                <button class="go-back" onclick="render('02')"> ← </button>
+            </div>
+            <div class="scene" id="scene-52">
+                <img class="image-bg" src="assets/board-18-QVMSZ-posterframe.jpg" alt="Safe">
+                <button class="go-back" onclick="render('02')"> ← </button>
+            </div>
+            <div class="scene" id="scene-61">
+                <img class="image-bg" src="assets/board-19-posterframe.jpg" alt="Offer #1">
+                <button class="go-back" onclick="render('02')"> ← </button>
+            </div>
+
+            <div class="scene scene-text" id="scene-fin">
+                <h2>Congratulations!</h2>
+                <p>You found <b>Umbrella Corp</b> secrets worth millions of €uros.</p>
+                <p>A living clean desk policy could have prevented this information theft.</p>
+                <p><strong>How does <span style="font-weight: 600;">your</span> desk look like?</strong></p>
+                <p style="text-align: center; margin-top: 80px;">
+                    <button onclick="window.open('https://karrierebibel.de/wp-content/uploads/2016/12/Clean-Desk-Policy-Deutsch-Vorlage-Beispiel.pdf')">
+                        → Read our clean desk policy
+                    </button>
+                </p>
+                <p style="text-align: center;">
+                    <button onclick="render('intro')">Restart</button>
+                </p>
+            </div>
+
+            <div id="notifications" class="hidden"></div>
+            <div id="inventory"></div>
+        </div>
+        <footer>Developed with ❤ by Bernd, Jakob &amp; Simon / SIM18 / University Of Applied Sciences Upper Austria</footer>
+    </main>
+    <script>
+        let currentScene = document.getElementById("scene-start");
+        const notificationElement = document.getElementById("notifications");
+
+        let hasPassword = false;
+        let hasSafeCode = false;
+        let hasCalendar = false;
+        let hasEmail = false;
+        let hasDoorKey = false;
+        let hasOffer1 = false;
+        let hasOffer2 = false;
+
+        function render(scene) {
+            notificationElement.classList.add('hidden');
+            const notifications = [];
+            let cannotProceed = false;
+
+            switch (scene) {
+                case 'intro':
+                    // Reset values (we jump here if the game is restarted)
+                    hasPassword = hasSafeCode = hasCalendar = hasEmail = hasDoorKey = hasOffer1 = hasOffer2 = false;
+                    break;
+                case '04':
+                    if (!hasEmail) {
+                        notifications.push('The CEO could be inside his office. Better check first...');
+                        cannotProceed = true;
+                        break;
+                    }
+                    if (!hasDoorKey) {
+                        notifications.push('The door can only be unlocked with a key.');
+                        cannotProceed = true;
+                        break;
+                    }
+                    if (!hasOffer2) {
+                        notifications.push('Bingo!');
+                        hasOffer2 = true;
+                    }
+                    break;
+                case '11':
+                    if (!hasCalendar) {
+                        notifications.push('This is too risky, the secretary could come back any time.');
+                        cannotProceed = true;
+                    }
+                    break;
+                case '12':
+                    if (!hasPassword) {
+                        notifications.push('The PC is protected with a password.');
+                        cannotProceed = true;
+                    }
+                    break;
+                case '13':
+                    if (!hasSafeCode) {
+                        notifications.push('What does this code unlock?');
+                        hasSafeCode = true;
+                    }
+                    break;
+                case '21':
+                    if (!hasCalendar) {
+                        notifications.push('This is too risky, the secretary could come back any time.');
+                        cannotProceed = true;
+                    }
+                    break;
+                case '22':
+                    if (!hasPassword) {
+                        notifications.push('This looks like the password for the PC...');
+                        hasPassword = true;
+                    }
+                    break;
+                case '33':
+                    if (!hasCalendar) {
+                        notifications.push('It looks like the secretary is currently on vacation.');
+                        hasCalendar = true;
+                    }
+                    break;
+                case '41':
+                    if (!hasCalendar) {
+                        notifications.push('This is too risky, the secretary could come back any time.');
+                        cannotProceed = true;
+                    }
+                    break;
+                case '42':
+                    if (!hasEmail) {
+                        notifications.push('It looks like the CEO is out of town today.');
+                        hasEmail = true;
+                    }
+                    break;
+                case '51':
+                    if (!hasCalendar) {
+                        notifications.push('This is too risky, the secretary could come back any time.');
+                        cannotProceed = true;
+                    }
+                    break;
+                case '52':
+                    if (!hasSafeCode) {
+                        notifications.push('The safe is protected with a code.');
+                        cannotProceed = true;
+                        break;
+                    }
+                    if (!hasDoorKey) {
+                        notifications.push('Hm... this looks like the key to the CEOs door.');
+                        hasDoorKey = true;
+                    }
+                    break;
+                case '61':
+                    if (!hasOffer1) {
+                        notifications.push('This could be a valuable information for my shady employer.');
+                        hasOffer1 = true;
+                    }
+                    break;
+                default:
+                    // Do nothing
+            }
+
+            if (notifications.length > 0 ) {
+                let notificationHtml = '';
+                notifications.forEach((message) => notificationHtml += `<li>${message}</li>`);
+                notificationElement.innerHTML = `<ul>${notificationHtml}</ul>`;
+                notificationElement.classList.remove('hidden');
+            }
+
+            if (cannotProceed) return;
+
+            currentScene.style.display = 'none';
+            currentScene = document.getElementById("scene-" + scene);
+            currentScene.style.display = 'block';
+        }
+
+        render('start')
+    </script>
+</body>
+</html>
